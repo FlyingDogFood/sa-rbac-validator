@@ -8,7 +8,7 @@ webhooks:
   reinvocationPolicy: {{ .Values.webhook.reinvocationPolicy }}
   failurePolicy: {{ .Values.webhook.failurePolicy }}
   clientConfig:
-    caBundle: {{ .Values.tls.crt }}
+    caBundle: {{ quote .Values.tls.crt }}
     service:
       namespace: {{ .Release.Namespace }}
       name: {{ include "sa-rbac-validator.fullname" . }}
