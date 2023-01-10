@@ -1,14 +1,16 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: {{ include "sa-rbac-validator.fullname" . }}
+  name: {{ include "sa-rbac-validator.fullname" . }}.flyingdogfood.github.com
 webhooks:
-- name: sa-rbac-validator.flyingdogfood.github.com
+- name: {{ include "sa-rbac-validator.fullname" . }}.flyingdogfood.github.com
   timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
+  sideEffects: None
+  admissionReviewVersions: ["v1"]
   reinvocationPolicy: {{ .Values.webhook.reinvocationPolicy }}
   failurePolicy: {{ .Values.webhook.failurePolicy }}
   clientConfig:
-    caBundle: {{ quote .Values.tls.crt }}
+    caBundle: | {{ .Values.tls.crt | nindent 6 }}
     service:
       namespace: {{ .Release.Namespace }}
       name: {{ include "sa-rbac-validator.fullname" . }}

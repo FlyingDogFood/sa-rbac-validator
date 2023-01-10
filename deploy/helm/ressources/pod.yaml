@@ -5,6 +5,7 @@ webhook:
     - "v1"
   resources: 
     - "pods"
+  scope: "Namespaced"
 
 saRbacValidator:
   saJsonPath: "/spec/serviceAccountName"

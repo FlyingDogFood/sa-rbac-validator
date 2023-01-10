@@ -5,6 +5,7 @@ webhook:
     - "v1"
   resources: 
     - "statefulSets"
+  scope: "Namespaced"
 
 saRbacValidator:
   saJsonPath: "/spec/template/spec/serviceAccountName"
