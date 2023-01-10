@@ -4,5 +4,5 @@ metadata:
   name: {{ include "sa-rbac-validator.fullname" . }}
 type: kubernetes.io/tls
 data:
-  tls.key: {{ .Values.tls.key | b64encode | quote  }}
-  tls.crt: {{ .Values.tls.crt | b64encode | quote }}
+  tls.key: {{ .Values.tls.key | b64enc | quote  }}
+  tls.crt: {{ .Values.tls.crt | b64enc | quote }}
