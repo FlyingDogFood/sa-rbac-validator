@@ -4,7 +4,7 @@ metadata:
   name: {{ include "sa-rbac-validator.fullname" . }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ include "sa-rbac-validator.fullname" . }}
+    app: {{ include "sa-rbac-validator.fullname" . }}
   ports:
     - protocol: TCP
       appProtocol: HTTP

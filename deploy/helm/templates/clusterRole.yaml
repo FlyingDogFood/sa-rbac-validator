@@ -8,8 +8,8 @@ rules:
     resources: 
       - roles 
       - rolebindings
-      - clusterRoles
-      - clusterRoleBindings
+      - clusterroles
+      - clusterrolebindings
     verbs: ["get", "watch", "list"]
   - apiGroups: 
       - ""
