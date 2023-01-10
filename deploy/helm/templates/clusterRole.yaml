@@ -18,15 +18,15 @@ rules:
       - ""
     resources: 
       - namespaces
-      - serviceaccounts
     verbs: 
       - "get"
       - "list"
       - "watch"
-  - apiGroup:
+  - apiGroups:
       - "authorization.k8s.io"
     resources:
       - tokenreviews
+      - tokenrequests
     verbs:
       - create
     

@@ -13,17 +13,18 @@ import (
 )
 
 func GetServiceAccount(client kubernetes.Interface, name string, namespace string) (user.Info, error) {
-	serviceAccount, err := client.CoreV1().ServiceAccounts(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
+	tokenRequest := authenticationv1.TokenRequest{
+		Spec: authenticationv1.TokenRequestSpec{
+			Audiences: []string{"api"},
+		},
 	}
-	token, err := client.CoreV1().Secrets(namespace).Get(context.TODO(), serviceAccount.Secrets[0].Name, metav1.GetOptions{})
+	token, err := client.CoreV1().ServiceAccounts(namespace).CreateToken(context.TODO(), name, &tokenRequest, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
 	review := &authenticationv1.TokenReview{
 		Spec: authenticationv1.TokenReviewSpec{
-			Token: string(token.Data["token"]),
+			Token: token.Status.Token,
 		},
 	}
 
