@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sa-rbac-validator.fullname" . }}
+  labels:
+    app: {{ include "sa-rbac-validator.fullname" . }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "sa-rbac-validator.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "sa-rbac-validator.fullname" . }}
+    spec:
+      serviceAccountName: {{ include "sa-rbac-validator.fullname" . }}
+      containers:
+      - name: sa-rbac-validator
+        image: {{ .Values.deployment.image }}:{{ .Values.deployment.imageTag | default .Chart.AppVersion }}
+        ports:
+        - containerPort: 8443
+        env:
+          - name: SA_RBAC_VALIDATOR_SA_JSONPATH
+            value: {{ .Values.saRbacValidator.saJsonPath }}
+          - name: SA_RBAC_VALIDATOR_TLS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "sa-rbac-validator.fullname" . }}
+                key: tls.key
+          - name: SA_RBAC_VALIDATOR_TLS_CRT
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "sa-rbac-validator.fullname" . }}
+                key: tls.crt
+        

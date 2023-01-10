@@ -1,0 +1,17 @@
+apiVersion: v2
+name: sa-rbac-validator
+description: A Helm chart for deploying the sa-rbac-validator validating webhook
+version: 0.1.0
+maintainers:
+  - name: FlyingDogFood
+    url: https://github.com/flyingdogfood/
+appVersion: 0.1.0
+keywords:
+  - sa-rbac-validator
+  - rbac
+  - serviceAccount
+  - Validatig-Webhook
+home: https://github.com/flyingdogfood/sa-rbac-validator
+## icon: https://example.com/mychart-icon.png
+sources:
+  - https://github.com/flyingdogfood/sa-rbac-validator

@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "sa-rbac-validator.fullname" . }}
+rules:
+  - apiGroups: 
+      - "rbac.authorization.k8s.io"
+    resources: 
+      - roles 
+      - rolebindings
+      - clusterRoles
+      - clusterRoleBindings
+    verbs: ["get", "watch", "list"]
+  - apiGroups: 
+      - ""
+    resources: 
+      - namespaces
+    verbs: ["get", "watch", "list"]

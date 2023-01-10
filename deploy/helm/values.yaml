@@ -1,0 +1,20 @@
+webhook: 
+  apiGroups: []
+  apiVersions: []
+  resources: []
+  scope: ""
+  failurePolicy: "Fail"
+  reinvocationPolicy: "IfNeeded"
+  timeoutSeconds: 10
+
+deployment:
+  replicas: 2
+  image: flyingdogfood/sa-rbac-validator
+  imageTag: 
+
+saRbacValidator:
+  saJsonPath: ""
+
+tls: 
+  crt: ""
+  key: ""

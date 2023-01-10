@@ -1,0 +1,10 @@
+webhook: 
+  apiGroups: 
+    - "apps"
+  apiVersions: 
+    - "v1"
+  resources: 
+    - "replicaSets"
+
+saRbacValidator:
+  saJsonPath: "/spec/template/spec/serviceAccountName"

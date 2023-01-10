@@ -1,0 +1,10 @@
+webhook: 
+  apiGroups: 
+    - ""
+  apiVersions: 
+    - "v1"
+  resources: 
+    - "pods"
+
+saRbacValidator:
+  saJsonPath: "/spec/serviceAccountName"

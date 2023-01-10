@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sa-rbac-validator.fullname" . }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "sa-rbac-validator.fullname" . }}
+  ports:
+    - protocol: TCP
+      appProtocol: HTTP
+      port: 443
+      targetPort: 8443
