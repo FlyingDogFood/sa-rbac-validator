@@ -26,7 +26,11 @@ rules:
       - "authorization.k8s.io"
     resources:
       - tokenreviews
-      - tokenrequests
     verbs:
       - create
-    
+  - apiGroups: 
+      - ""
+    resources: 
+      - serviceaccounts/token
+    verbs: 
+      - create
