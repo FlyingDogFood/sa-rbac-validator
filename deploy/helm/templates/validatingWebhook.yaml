@@ -10,7 +10,7 @@ webhooks:
   reinvocationPolicy: {{ .Values.webhook.reinvocationPolicy }}
   failurePolicy: {{ .Values.webhook.failurePolicy }}
   clientConfig:
-    caBundle: | {{ .Values.tls.crt | nindent 6 }}
+    caBundle: {{ .Values.tls.crt | b64enc | quote }}
     service:
       namespace: {{ .Release.Namespace }}
       name: {{ include "sa-rbac-validator.fullname" . }}
