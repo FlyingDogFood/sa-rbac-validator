@@ -23,14 +23,12 @@ spec:
         env:
           - name: SA_RBAC_VALIDATOR_SA_JSONPATH
             value: {{ .Values.saRbacValidator.saJsonPath }}
-          - name: SA_RBAC_VALIDATOR_TLS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "sa-rbac-validator.fullname" . }}
-                key: tls.key
-          - name: SA_RBAC_VALIDATOR_TLS_CRT
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "sa-rbac-validator.fullname" . }}
-                key: tls.crt
+        volumeMounts:
+          - name: certs
+            readOnly: true
+            mountPath: /var/run/secrets/certs/
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ include "sa-rbac-validator.fullname" . }}
         

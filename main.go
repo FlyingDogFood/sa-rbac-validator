@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -41,10 +42,14 @@ func main() {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		//TODO
+		fmt.Printf(err.Error())
+		os.Exit(1)
 	}
 	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		//TODO
+		fmt.Printf(err.Error())
+		os.Exit(1)
 	}
 
 	stopper := make(chan struct{})
@@ -77,5 +82,10 @@ func main() {
 			ServiceAccountJsonPointer:  os.Getenv("SA_RBAC_VALIDATOR_SA_JSONPATH"),
 		},
 	})
-	http.ListenAndServeTLS(":8443", os.Getenv("SA_RBAC_VALIDATOR_TLS_CRT"), os.Getenv("SA_RBAC_VALIDATOR_TLS_KEY"), nil)
+	err = http.ListenAndServeTLS(":8443", "/var/run/secrets/certs/tls.crt", "/var/run/secrets/certs/tls.key", nil)
+	if err != nil {
+		//TODO
+		fmt.Printf(err.Error())
+		os.Exit(1)
+	}
 }
