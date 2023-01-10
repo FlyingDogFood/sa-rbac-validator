@@ -10,9 +10,23 @@ rules:
       - rolebindings
       - clusterroles
       - clusterrolebindings
-    verbs: ["get", "watch", "list"]
+    verbs: 
+      - "get"
+      - "list"
+      - "watch"
   - apiGroups: 
       - ""
     resources: 
       - namespaces
-    verbs: ["get", "watch", "list"]
+      - serviceaccounts
+    verbs: 
+      - "get"
+      - "list"
+      - "watch"
+  - apiGroup:
+      - "authorization.k8s.io"
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+    

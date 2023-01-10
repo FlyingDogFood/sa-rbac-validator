@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 
@@ -25,7 +26,12 @@ func ExtractServiceAccount(request *admissionv1.AdmissionRequest, jsonPointer st
 	if err != nil {
 		return "", err
 	}
-	val, kind, err := ptr.Get(request.Object)
+	var object interface{}
+	err = json.Unmarshal(request.Object.Raw, &object)
+	if err != nil {
+		return "", err
+	}
+	val, kind, err := ptr.Get(object)
 	if err != nil {
 		return "", err
 	}
