@@ -23,6 +23,10 @@ spec:
         env:
           - name: SA_RBAC_VALIDATOR_SA_JSONPATH
             value: {{ .Values.saRbacValidator.saJsonPath }}
+          - name: SA_RBAC_VALIDATOR_LOG_LEVEL
+            value: {{ .Values.saRbacValidator.logLevel }}
+          - name: SA_RBAC_VALIDATOR_SA_NOT_FOUND_BEHAVIOR
+            value: {{ .Values.saRbacValidator.saNotFoundBehavior }}
         volumeMounts:
           - name: certs
             readOnly: true

@@ -9,3 +9,5 @@ webhook:
 
 saRbacValidator:
   saJsonPath: "/spec/template/spec/serviceAccountName"
+  # Allow Request as if ServiceAccount is empty in StatefulSet it is set in Pod
+  saNotFoundBehavior: "allow"

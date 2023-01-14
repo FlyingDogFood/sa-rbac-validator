@@ -14,6 +14,10 @@ deployment:
 
 saRbacValidator:
   saJsonPath: ""
+  logLevel: "info"
+  # Defines if the AdmissionReview should be denied or allowed if the ServiceAccount is not found under the specified JsonPath
+  # Allowed values: deny, allow
+  saNotFoundBehavior: "deny"
 
 tls: 
   crt: ""

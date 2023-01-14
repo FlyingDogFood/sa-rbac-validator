@@ -1,7 +1,11 @@
 package pkg
 
 import (
+	"errors"
 	"net/http"
+	"strings"
+
+	"github.com/rs/zerolog"
 
 	util "github.com/flyingdogfood/sa-rbac-validator/util"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -14,6 +18,7 @@ import (
 )
 
 type SaRbacValidatorConfig struct {
+	Logger                     zerolog.Logger
 	Client                     kubernetes.Clientset
 	ClusterRoleBindingInformer rbacInformersv1.ClusterRoleBindingInformer
 	RoleBindingInformer        rbacInformersv1.RoleBindingInformer
@@ -21,28 +26,63 @@ type SaRbacValidatorConfig struct {
 	RoleInformer               rbacInformersv1.RoleInformer
 	NamespaceInformer          v1.NamespaceInformer
 	ServiceAccountJsonPointer  string
+	SaNotFoundBehavior         int
+}
+
+const (
+	Deny = iota
+	Allow
+)
+
+func PraseNotFoundBehavior(behavior string) (int, error) {
+	behaviorLower := strings.ToLower(behavior)
+	if behaviorLower == "deny" {
+		return Deny, nil
+	}
+	if behaviorLower == "allow" {
+		return Allow, nil
+	}
+	return -1, errors.New("Faild to phrase behavior. Behavior: " + behavior + " invalid")
 }
 
 func Validate(request *admissionv1.AdmissionRequest, saRbacValidatorConfig SaRbacValidatorConfig) *admissionv1.AdmissionResponse {
+	logger := saRbacValidatorConfig.Logger.With().Str("Request UID", string(request.UID)).Logger()
+	logger.Info().Msg("Start Validating Request")
 	//Extract user from reqeust to later compare it's permissions to the service acount
 	user := util.ExtractUser(request)
+	logger.Info().Str("UserName", user.GetName()).Str("UserUID", user.GetUID()).Strs("UserGroups", user.GetGroups())
 
 	//Extract service account name from admission request
 	serviceAccount, err := util.ExtractServiceAccount(request, saRbacValidatorConfig.ServiceAccountJsonPointer)
 	if err != nil {
+		logger.Error().Err(err).Msg("Failed to extract ServiceAccount")
+		if saRbacValidatorConfig.SaNotFoundBehavior == Deny {
+			logger.Info().Msg("Request denied")
+			return &admissionv1.AdmissionResponse{
+				UID:     request.UID,
+				Allowed: false,
+				Result: &metav1.Status{
+					Message: err.Error(),
+					Code:    http.StatusForbidden,
+				},
+			}
+		}
+		logger.Info().Msg("Request allowed")
 		return &admissionv1.AdmissionResponse{
 			UID:     request.UID,
-			Allowed: false,
+			Allowed: true,
 			Result: &metav1.Status{
 				Message: err.Error(),
-				Code:    http.StatusForbidden,
+				Code:    http.StatusOK,
 			},
 		}
 	}
+	logger.Info().Str("ServiceAccountName", serviceAccount)
 
 	// Create the user.Info struct for the service account as we are using this to get all the associated roles of the serviceaccount
 	serviceAccountUser, err := util.GetServiceAccount(&saRbacValidatorConfig.Client, serviceAccount, request.Namespace)
 	if err != nil {
+		logger.Error().Err(err).Msg("Failed to get ServiceAccount User")
 		return &admissionv1.AdmissionResponse{
 			UID:     request.UID,
 			Allowed: false,
@@ -52,9 +92,11 @@ func Validate(request *admissionv1.AdmissionRequest, saRbacValidatorConfig SaRba
 			},
 		}
 	}
+	logger.Info().Str("ServiceAccountName", serviceAccountUser.GetName()).Str("ServiceAccountNamespace", request.Namespace).Str("ServiceAccountUID", serviceAccountUser.GetUID()).Strs("ServiceAccountGroups", serviceAccountUser.GetGroups())
 
 	namespaces, err := saRbacValidatorConfig.NamespaceInformer.Lister().List(labels.Everything())
 	if err != nil {
+		logger.Error().Err(err).Msg("Failed to list namespaces")
 		return &admissionv1.AdmissionResponse{
 			UID:     request.UID,
 			Allowed: false,
@@ -69,6 +111,7 @@ func Validate(request *admissionv1.AdmissionRequest, saRbacValidatorConfig SaRba
 	namespacedEscalationRules := make(map[string][]rbacv1.PolicyRule)
 
 	for _, namespace := range namespaces {
+		logger.Info().Str("Processing Namespace", namespace.Name)
 		var saRules []rbacv1.PolicyRule
 		var userRules []rbacv1.PolicyRule
 		roleBindings, err := saRbacValidatorConfig.RoleBindingInformer.Lister().RoleBindings(namespace.Name).List(labels.Everything())
@@ -83,6 +126,7 @@ func Validate(request *admissionv1.AdmissionRequest, saRbacValidatorConfig SaRba
 			}
 		}
 		for _, roleBinding := range roleBindings {
+			logger.Info().Str("Processing RoleBinding", roleBinding.Name)
 			if util.SubjectsMatchesUserOrServiceAccount(roleBinding.Subjects, serviceAccountUser, roleBinding.Namespace) {
 				rules, err := util.GetRulesForRoleBinding(*roleBinding, saRbacValidatorConfig.RoleInformer, saRbacValidatorConfig.ClusterRoleInformer)
 				if err != nil {

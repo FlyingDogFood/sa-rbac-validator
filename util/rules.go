@@ -99,19 +99,25 @@ func AddRules(rules []rbacv1.PolicyRule, addRules []rbacv1.PolicyRule) []rbacv1.
 func ContainsRule(rules []rbacv1.PolicyRule, rule rbacv1.PolicyRule) int {
 	for index, loopRule := range rules {
 		if len(loopRule.NonResourceURLs) > 0 {
-			if loopRule.NonResourceURLs[0] == rule.NonResourceURLs[0] {
-				return index
+			if len(rule.NonResourceURLs) > 0 {
+				if loopRule.NonResourceURLs[0] == rule.NonResourceURLs[0] {
+					return index
+				}
 			}
 			continue
 		}
-		if loopRule.APIGroups[0] == rule.APIGroups[0] && loopRule.Resources[0] == rule.Resources[0] {
-			if len(loopRule.ResourceNames) > 0 {
-				if loopRule.ResourceNames[0] == rule.ResourceNames[0] {
+		if len(loopRule.APIGroups) > 0 && len(loopRule.Resources) > 0 {
+			if len(rule.APIGroups) > 0 && len(rule.Resources) > 0 {
+				if loopRule.APIGroups[0] == rule.APIGroups[0] && loopRule.Resources[0] == rule.Resources[0] {
+					if len(loopRule.ResourceNames) > 0 {
+						if loopRule.ResourceNames[0] == rule.ResourceNames[0] {
+							return index
+						}
+						continue
+					}
 					return index
 				}
-				continue
 			}
-			return index
 		}
 	}
 	return -1
@@ -122,10 +128,10 @@ func MergeRuleVerbs(verbs1 []string, verbs2 []string) []string {
 	// If either verbs1 or verbs2 has the verb * we can return the rule directly
 	verbs1 = ReduceVerbs(verbs1)
 	verbs2 = ReduceVerbs(verbs2)
-	if verbs1[0] == "*" {
+	if len(verbs1) > 0 && verbs1[0] == "*" {
 		return verbs1
 	}
-	if verbs2[0] == "*" {
+	if len(verbs2) > 0 && verbs2[0] == "*" {
 		return verbs2
 	}
 	verbs := verbs1
